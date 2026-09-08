@@ -92,3 +92,20 @@ def checar_reescrita_em_massa(tree, resolver):
                 break
             ancestral = primeiro_ancestral(ancestral, ast.For)
     return achados
+
+
+def checar_pipe_shell_remoto(tree, resolver):
+    achados = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if resolver.resolver_chamada(node) not in FUNCOES_SHELL:
+            continue
+        for literal in _literais_de_string(node):
+            if _PADRAO_CURL_PIPE.search(literal):
+                achados.append(_achado(
+                    "remote-shell-pipe", "CRITICA", node,
+                    "Comando baixa conteudo da internet e executa direto no shell (curl | bash).",
+                ))
+                break
+    return achados

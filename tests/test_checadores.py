@@ -55,3 +55,16 @@ def test_checar_reescrita_nao_detecta_falso_positivo_estrutural():
     )
     achados = checadores.checar_reescrita_em_massa(tree, resolvedor)
     assert achados == []
+
+
+def test_checar_pipe_shell_detecta_no_arquivo_perigoso():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_shell_pipe_perigoso.py")
+    achados = checadores.checar_pipe_shell_remoto(tree, resolvedor)
+    assert len(achados) == 1
+    assert achados[0]["regra_id"] == "remote-shell-pipe"
+
+
+def test_checar_pipe_shell_nao_detecta_em_print_inofensivo():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_shell_pipe_seguro.py")
+    achados = checadores.checar_pipe_shell_remoto(tree, resolvedor)
+    assert achados == []
