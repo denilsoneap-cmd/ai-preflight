@@ -39,4 +39,12 @@ ALL_RULES = [
         "padrao": r"\b(eval|exec)\(\s*(?![\"'])",
         "mensagem": "eval/exec chamado sobre uma variavel, nao um texto fixo — risco de executar codigo desconhecido.",
     },
+    {
+        "id": "mass-delete",
+        "tipo": RULE_COOCORRENCIA,
+        "severidade": "ALTA",
+        "padrao_a": r"\b(for|while)\b",
+        "padrao_b": r"shutil\.rmtree\(|os\.remove\(",
+        "mensagem": "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco — risco de apagar mais do que deveria.",
+    },
 ]
