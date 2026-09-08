@@ -95,3 +95,17 @@ def test_checar_eval_exec_dinamico_nao_detecta_texto_fixo():
     tree, resolvedor = _preparar("tests/fixtures/v2/dynamic_eval_exec_seguro.py")
     achados = checadores.checar_eval_exec_dinamico(tree, resolvedor)
     assert achados == []
+
+
+def test_checar_delecao_em_massa_detecta_no_arquivo_perigoso():
+    tree, resolvedor = _preparar("tests/fixtures/v2/mass_delete_perigoso.py")
+    achados = checadores.checar_delecao_em_massa(tree, resolvedor)
+    assert len(achados) == 1
+    assert achados[0]["regra_id"] == "mass-delete"
+    assert achados[0]["severidade"] == "ALTA"
+
+
+def test_checar_delecao_em_massa_nao_detecta_delete_avulso():
+    tree, resolvedor = _preparar("tests/fixtures/v2/mass_delete_seguro.py")
+    achados = checadores.checar_delecao_em_massa(tree, resolvedor)
+    assert achados == []

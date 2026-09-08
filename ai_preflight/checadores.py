@@ -178,3 +178,18 @@ def checar_eval_exec_dinamico(tree, resolver):
                 "eval/exec chamado sobre uma variavel, nao um texto fixo - risco de executar codigo desconhecido.",
             ))
     return achados
+
+
+def checar_delecao_em_massa(tree, resolver):
+    achados = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if resolver.resolver_chamada(node) not in FUNCOES_DELETE:
+            continue
+        if primeiro_ancestral(node, (ast.For, ast.While)) is not None:
+            achados.append(_achado(
+                "mass-delete", "ALTA", node,
+                "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco - risco de apagar mais do que deveria.",
+            ))
+    return achados
