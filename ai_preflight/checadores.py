@@ -193,3 +193,40 @@ def checar_delecao_em_massa(tree, resolver):
                 "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco - risco de apagar mais do que deveria.",
             ))
     return achados
+
+
+def _e_caminho_git_hooks(node, resolver):
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return ".git" in node.value and "hooks" in node.value
+    if isinstance(node, ast.Call) and resolver.resolver_chamada(node) == "os.path.join":
+        literais = _literais_de_string(node)
+        return ".git" in literais and "hooks" in literais
+    return False
+
+
+def checar_injecao_git_hook(tree, resolver):
+    achados = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "open"):
+            continue
+        if _modo_de_abertura(node) != "w":
+            continue
+        if not node.args:
+            continue
+        if _e_caminho_git_hooks(node.args[0], resolver):
+            achados.append(_achado(
+                "git-hook-injection", "MEDIA", node,
+                "Escreve dentro de .git/hooks - instala automacao que roda em todo commit, sem voce perceber.",
+            ))
+    return achados
+
+
+TODOS_CHECADORES = [
+    checar_pacote_instalado_silenciosamente,
+    checar_reescrita_em_massa,
+    checar_pipe_shell_remoto,
+    checar_execucao_remota,
+    checar_eval_exec_dinamico,
+    checar_delecao_em_massa,
+    checar_injecao_git_hook,
+]

@@ -109,3 +109,27 @@ def test_checar_delecao_em_massa_nao_detecta_delete_avulso():
     tree, resolvedor = _preparar("tests/fixtures/v2/mass_delete_seguro.py")
     achados = checadores.checar_delecao_em_massa(tree, resolvedor)
     assert achados == []
+
+
+def test_checar_injecao_git_hook_detecta_caminho_literal():
+    tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_perigoso.py")
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert len(achados) == 1
+    assert achados[0]["regra_id"] == "git-hook-injection"
+    assert achados[0]["severidade"] == "MEDIA"
+
+
+def test_checar_injecao_git_hook_nao_detecta_arquivo_comum():
+    tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_seguro.py")
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert achados == []
+
+
+def test_checar_injecao_git_hook_detecta_via_os_path_join():
+    tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_os_path_join_perigoso.py")
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_todos_checadores_tem_sete_funcoes():
+    assert len(checadores.TODOS_CHECADORES) == 7
