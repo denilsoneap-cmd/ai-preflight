@@ -55,3 +55,40 @@ def checar_pacote_instalado_silenciosamente(tree, resolver):
                 "Instalacao de pacote embutida no script, sem pedir confirmacao.",
             ))
     return achados
+
+
+def _modo_de_abertura(node):
+    if len(node.args) >= 2:
+        arg = node.args[1]
+        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+            return arg.value
+    for kw in node.keywords:
+        if kw.arg == "mode" and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, str):
+            return kw.value.value
+    return None
+
+
+def _iter_e_os_walk(for_node, resolver):
+    it = for_node.iter
+    if isinstance(it, ast.Call):
+        return resolver.resolver_chamada(it) == "os.walk"
+    return False
+
+
+def checar_reescrita_em_massa(tree, resolver):
+    achados = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "open"):
+            continue
+        if _modo_de_abertura(node) != "w":
+            continue
+        ancestral = primeiro_ancestral(node, ast.For)
+        while ancestral is not None:
+            if _iter_e_os_walk(ancestral, resolver):
+                achados.append(_achado(
+                    "mass-file-rewrite", "CRITICA", node,
+                    "Arquivo varre o projeto (os.walk) e reescreve arquivos (open com modo 'w') dentro do mesmo laco.",
+                ))
+                break
+            ancestral = primeiro_ancestral(ancestral, ast.For)
+    return achados
