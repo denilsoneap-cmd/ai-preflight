@@ -17,4 +17,11 @@ ALL_RULES = [
         "padrao_b": r"open\([^)]*['\"]w['\"]",
         "mensagem": "Arquivo varre o projeto (os.walk) e reescreve arquivos (open com modo 'w') no mesmo script.",
     },
+    {
+        "id": "remote-shell-pipe",
+        "tipo": RULE_LINHA,
+        "severidade": "CRITICA",
+        "padrao": r"curl\s.*\|\s*(bash|sh)\b",
+        "mensagem": "Comando baixa conteudo da internet e executa direto no shell (curl | bash).",
+    },
 ]

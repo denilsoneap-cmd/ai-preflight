@@ -33,3 +33,15 @@ def test_nao_detecta_mass_file_rewrite_no_arquivo_seguro():
     regra = _regra("mass-file-rewrite")
     achados = escanear_arquivo("tests/fixtures/mass_file_rewrite_seguro.py", regra)
     assert achados == []
+
+
+def test_detecta_remote_shell_pipe_no_arquivo_perigoso():
+    regra = _regra("remote-shell-pipe")
+    achados = escanear_arquivo("tests/fixtures/remote_shell_pipe_perigoso.py", regra)
+    assert len(achados) == 1
+
+
+def test_nao_detecta_remote_shell_pipe_no_arquivo_seguro():
+    regra = _regra("remote-shell-pipe")
+    achados = escanear_arquivo("tests/fixtures/remote_shell_pipe_seguro.py", regra)
+    assert achados == []
