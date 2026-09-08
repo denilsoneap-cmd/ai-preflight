@@ -9,4 +9,12 @@ ALL_RULES = [
         "padrao": r"subprocess\.(run|call|Popen)\(.*\b(pip|npm)\b.*install",
         "mensagem": "Instalacao de pacote embutida no script, sem pedir confirmacao.",
     },
+    {
+        "id": "mass-file-rewrite",
+        "tipo": RULE_COOCORRENCIA,
+        "severidade": "CRITICA",
+        "padrao_a": r"os\.walk\(",
+        "padrao_b": r"open\([^)]*['\"]w['\"]",
+        "mensagem": "Arquivo varre o projeto (os.walk) e reescreve arquivos (open com modo 'w') no mesmo script.",
+    },
 ]

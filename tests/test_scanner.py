@@ -19,3 +19,17 @@ def test_nao_detecta_no_arquivo_seguro():
     regra = _regra("silent-package-install")
     achados = escanear_arquivo("tests/fixtures/silent_package_install_seguro.py", regra)
     assert achados == []
+
+
+def test_detecta_mass_file_rewrite_no_arquivo_perigoso():
+    regra = _regra("mass-file-rewrite")
+    achados = escanear_arquivo("tests/fixtures/mass_file_rewrite_perigoso.py", regra)
+    assert len(achados) == 1
+    assert achados[0]["regra_id"] == "mass-file-rewrite"
+    assert achados[0]["linha"] is None
+
+
+def test_nao_detecta_mass_file_rewrite_no_arquivo_seguro():
+    regra = _regra("mass-file-rewrite")
+    achados = escanear_arquivo("tests/fixtures/mass_file_rewrite_seguro.py", regra)
+    assert achados == []
