@@ -23,3 +23,9 @@ def test_escanear_arquivo_roda_todos_os_checadores_sem_erro_em_arquivo_vazio(tmp
     arquivo.write_text("")
     achados = escanear_arquivo(str(arquivo))
     assert achados == []
+
+
+def test_escanear_arquivo_le_arquivo_com_bom_utf8():
+    achados = escanear_arquivo("tests/fixtures/v2/silent_package_install_bom_perigoso.py")
+    ids = [a["regra_id"] for a in achados]
+    assert "silent-package-install" in ids

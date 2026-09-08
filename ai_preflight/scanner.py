@@ -6,7 +6,7 @@ from ai_preflight.checadores import TODOS_CHECADORES
 
 
 def escanear_arquivo(caminho):
-    with open(caminho, "r", encoding="utf-8", errors="ignore") as f:
+    with open(caminho, "r", encoding="utf-8-sig", errors="ignore") as f:
         conteudo = f.read()
 
     tree = ast.parse(conteudo, filename=caminho)

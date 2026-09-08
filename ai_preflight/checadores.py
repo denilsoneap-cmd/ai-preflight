@@ -136,24 +136,14 @@ def _andar_sem_descer_em_escopos_aninhados(nos):
 
 
 def _escopos_de_execucao(tree):
-    escopos = []
     nivel_modulo = [
         node for node in tree.body
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
     ]
-    escopos.append(_andar_sem_descer_em_escopos_aninhados(nivel_modulo))
-
-    pendentes = [
-        node for node in tree.body
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
-    ]
-    while pendentes:
-        no = pendentes.pop()
-        escopos.append(_andar_sem_descer_em_escopos_aninhados(no.body))
-        pendentes.extend(
-            sub for sub in no.body
-            if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
-        )
+    escopos = [_andar_sem_descer_em_escopos_aninhados(nivel_modulo)]
+    for no in ast.walk(tree):
+        if isinstance(no, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            escopos.append(_andar_sem_descer_em_escopos_aninhados(no.body))
     return escopos
 
 
@@ -205,7 +195,10 @@ def checar_delecao_em_massa(tree, resolver):
             continue
         if resolver.resolver_chamada(node) not in FUNCOES_DELETE:
             continue
-        if primeiro_ancestral(node, (ast.For, ast.While)) is not None:
+        if primeiro_ancestral(
+            node,
+            (ast.For, ast.AsyncFor, ast.While, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp),
+        ) is not None:
             achados.append(_achado(
                 "mass-delete", "ALTA", node,
                 "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco - risco de apagar mais do que deveria.",

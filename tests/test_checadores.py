@@ -158,3 +158,33 @@ def test_checar_injecao_git_hook_detecta_modo_append():
 
 def test_todos_checadores_tem_sete_funcoes():
     assert len(checadores.TODOS_CHECADORES) == 7
+
+
+def test_checar_execucao_remota_detecta_funcao_dentro_de_try():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_code_execution_dentro_de_try_perigoso.py")
+    achados = checadores.checar_execucao_remota(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_checar_reescrita_em_massa_detecta_io_open():
+    tree, resolvedor = _preparar("tests/fixtures/v2/mass_file_rewrite_io_open_perigoso.py")
+    achados = checadores.checar_reescrita_em_massa(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_checar_injecao_git_hook_detecta_io_open():
+    tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_io_open_perigoso.py")
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_checar_reescrita_em_massa_nao_detecta_modo_leitura():
+    tree, resolvedor = _preparar("tests/fixtures/v2/mass_file_rewrite_modo_leitura_seguro.py")
+    achados = checadores.checar_reescrita_em_massa(tree, resolvedor)
+    assert achados == []
+
+
+def test_checar_delecao_em_massa_detecta_dentro_de_list_comprehension():
+    tree, resolvedor = _preparar("tests/fixtures/v2/mass_delete_comprehension_perigoso.py")
+    achados = checadores.checar_delecao_em_massa(tree, resolvedor)
+    assert len(achados) == 1
