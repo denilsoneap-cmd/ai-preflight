@@ -24,4 +24,12 @@ ALL_RULES = [
         "padrao": r"curl\s.*\|\s*(bash|sh)\b",
         "mensagem": "Comando baixa conteudo da internet e executa direto no shell (curl | bash).",
     },
+    {
+        "id": "remote-code-execution",
+        "tipo": RULE_COOCORRENCIA,
+        "severidade": "CRITICA",
+        "padrao_a": r"requests\.get\(|urllib\.request",
+        "padrao_b": r"\b(exec|eval)\(",
+        "mensagem": "Script baixa conteudo da internet (requests/urllib) e executa (exec/eval) no mesmo arquivo.",
+    },
 ]
