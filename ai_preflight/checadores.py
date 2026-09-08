@@ -160,3 +160,21 @@ def checar_execucao_remota(tree, resolver):
                 "Script baixa conteudo da internet (requests/urllib) e executa (exec/eval) no mesmo escopo.",
             ))
     return achados
+
+
+def checar_eval_exec_dinamico(tree, resolver):
+    achados = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if resolver.resolver_chamada(node) not in ("eval", "exec"):
+            continue
+        if not node.args:
+            continue
+        primeiro = node.args[0]
+        if not (isinstance(primeiro, ast.Constant) and isinstance(primeiro.value, str)):
+            achados.append(_achado(
+                "dynamic-eval-exec", "ALTA", node,
+                "eval/exec chamado sobre uma variavel, nao um texto fixo - risco de executar codigo desconhecido.",
+            ))
+    return achados
