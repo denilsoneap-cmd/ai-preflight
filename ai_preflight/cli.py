@@ -1,7 +1,6 @@
 import argparse
 import sys
 
-from ai_preflight.rules import ALL_RULES
 from ai_preflight.scanner import escanear_arquivo
 from ai_preflight.report import formatar_relatorio
 
@@ -19,9 +18,12 @@ def main(argv=None):
         return 2
 
     try:
-        achados = escanear_arquivo(args.arquivo, ALL_RULES)
+        achados = escanear_arquivo(args.arquivo)
     except FileNotFoundError:
         print(f"Arquivo nao encontrado: {args.arquivo}")
+        return 2
+    except SyntaxError as erro:
+        print(f"Nao foi possivel interpretar o arquivo como Python valido: {erro}")
         return 2
 
     print(formatar_relatorio(achados))

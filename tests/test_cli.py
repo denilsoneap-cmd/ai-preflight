@@ -25,3 +25,12 @@ def test_main_retorna_2_quando_arquivo_nao_e_py(capsys, tmp_path):
     arquivo_txt.write_text("ola")
     codigo = main([str(arquivo_txt)])
     assert codigo == 2
+
+
+def test_main_retorna_2_quando_arquivo_tem_erro_de_sintaxe(capsys, tmp_path):
+    arquivo_py = tmp_path / "quebrado.py"
+    arquivo_py.write_text("def f(:\n")
+    codigo = main([str(arquivo_py)])
+    saida = capsys.readouterr().out
+    assert codigo == 2
+    assert "nao foi possivel interpretar" in saida.lower()
