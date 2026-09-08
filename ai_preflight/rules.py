@@ -37,7 +37,7 @@ ALL_RULES = [
         "tipo": RULE_LINHA,
         "severidade": "ALTA",
         "padrao": r"\b(eval|exec)\(\s*(?![\"'])",
-        "mensagem": "eval/exec chamado sobre uma variavel, nao um texto fixo — risco de executar codigo desconhecido.",
+        "mensagem": "eval/exec chamado sobre uma variavel, nao um texto fixo - risco de executar codigo desconhecido.",
     },
     {
         "id": "mass-delete",
@@ -45,13 +45,13 @@ ALL_RULES = [
         "severidade": "ALTA",
         "padrao_a": r"\b(for|while)\b",
         "padrao_b": r"shutil\.rmtree\(|os\.remove\(",
-        "mensagem": "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco — risco de apagar mais do que deveria.",
+        "mensagem": "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco - risco de apagar mais do que deveria.",
     },
     {
         "id": "git-hook-injection",
         "tipo": RULE_LINHA,
         "severidade": "MEDIA",
         "padrao": r"open\([^)]*\.git[\\/]+hooks[^)]*['\"]w['\"]",
-        "mensagem": "Escreve dentro de .git/hooks — instala automacao que roda em todo commit, sem voce perceber.",
+        "mensagem": "Escreve dentro de .git/hooks - instala automacao que roda em todo commit, sem voce perceber.",
     },
 ]

@@ -5,7 +5,7 @@ def formatar_relatorio(achados):
     if not achados:
         return (
             "Nenhum padrao perigoso encontrado.\n"
-            "Isso nao garante que o script e seguro — revise manualmente antes de rodar."
+            "Isso nao garante que o script e seguro - revise manualmente antes de rodar."
         )
 
     achados_ordenados = sorted(achados, key=lambda a: ORDEM_SEVERIDADE.get(a["severidade"], 99))
