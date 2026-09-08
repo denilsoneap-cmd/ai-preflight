@@ -1,0 +1,27 @@
+from ai_preflight.cli import main
+
+
+def test_main_retorna_1_quando_ha_achado_critico(capsys):
+    codigo = main(["tests/fixtures/silent_package_install_perigoso.py"])
+    saida = capsys.readouterr().out
+    assert codigo == 1
+    assert "silent-package-install" in saida
+
+
+def test_main_retorna_0_quando_arquivo_e_seguro(capsys):
+    codigo = main(["tests/fixtures/silent_package_install_seguro.py"])
+    assert codigo == 0
+
+
+def test_main_retorna_2_quando_arquivo_nao_existe(capsys):
+    codigo = main(["nao_existe.py"])
+    saida = capsys.readouterr().out
+    assert codigo == 2
+    assert "nao encontrado" in saida.lower()
+
+
+def test_main_retorna_2_quando_arquivo_nao_e_py(capsys, tmp_path):
+    arquivo_txt = tmp_path / "nota.txt"
+    arquivo_txt.write_text("ola")
+    codigo = main([str(arquivo_txt)])
+    assert codigo == 2
