@@ -109,3 +109,54 @@ def checar_pipe_shell_remoto(tree, resolver):
                 ))
                 break
     return achados
+
+
+def _andar_sem_descer_em_escopos_aninhados(nos):
+    resultado = []
+    pilha = list(nos)
+    while pilha:
+        node = pilha.pop()
+        resultado.append(node)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        pilha.extend(ast.iter_child_nodes(node))
+    return resultado
+
+
+def _escopos_de_execucao(tree):
+    escopos = []
+    nivel_modulo = []
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            escopos.append(_andar_sem_descer_em_escopos_aninhados(node.body))
+        elif isinstance(node, ast.ClassDef):
+            for sub in node.body:
+                if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    escopos.append(_andar_sem_descer_em_escopos_aninhados(sub.body))
+        else:
+            nivel_modulo.append(node)
+    escopos.append(_andar_sem_descer_em_escopos_aninhados(nivel_modulo))
+    return escopos
+
+
+def checar_execucao_remota(tree, resolver):
+    achados = []
+    for escopo in _escopos_de_execucao(tree):
+        chamada_download = None
+        chamada_exec = None
+        for node in escopo:
+            if not isinstance(node, ast.Call):
+                continue
+            nome = resolver.resolver_chamada(node)
+            if nome is None:
+                continue
+            if nome == "requests.get" or nome.startswith("urllib.request."):
+                chamada_download = chamada_download or node
+            elif nome in ("eval", "exec"):
+                chamada_exec = chamada_exec or node
+        if chamada_download is not None and chamada_exec is not None:
+            achados.append(_achado(
+                "remote-code-execution", "CRITICA", chamada_exec,
+                "Script baixa conteudo da internet (requests/urllib) e executa (exec/eval) no mesmo escopo.",
+            ))
+    return achados

@@ -68,3 +68,16 @@ def test_checar_pipe_shell_nao_detecta_em_print_inofensivo():
     tree, resolvedor = _preparar("tests/fixtures/v2/remote_shell_pipe_seguro.py")
     achados = checadores.checar_pipe_shell_remoto(tree, resolvedor)
     assert achados == []
+
+
+def test_checar_execucao_remota_detecta_no_arquivo_perigoso():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_code_execution_perigoso.py")
+    achados = checadores.checar_execucao_remota(tree, resolvedor)
+    assert len(achados) == 1
+    assert achados[0]["regra_id"] == "remote-code-execution"
+
+
+def test_checar_execucao_remota_nao_detecta_quando_em_escopos_diferentes():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_code_execution_seguro.py")
+    achados = checadores.checar_execucao_remota(tree, resolvedor)
+    assert achados == []
