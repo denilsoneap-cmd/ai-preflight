@@ -212,6 +212,10 @@ def _e_caminho_git_hooks(node, resolver):
     if isinstance(node, ast.Call) and resolver.resolver_chamada(node) == "os.path.join":
         literais = _literais_de_string(node)
         return ".git" in literais and "hooks" in literais
+    if isinstance(node, ast.Name):
+        valor = resolver.resolver_valor(node)
+        if valor is not None:
+            return _e_caminho_git_hooks(valor, resolver)
     return False
 
 

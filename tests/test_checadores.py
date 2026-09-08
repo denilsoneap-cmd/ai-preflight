@@ -156,6 +156,20 @@ def test_checar_injecao_git_hook_detecta_modo_append():
     assert len(achados) == 1
 
 
+def test_checar_injecao_git_hook_detecta_via_variavel():
+    tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_via_variavel_perigoso.py")
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_checar_injecao_git_hook_nao_detecta_via_variavel_reatribuida():
+    tree, resolvedor = _preparar(
+        "tests/fixtures/v2/git_hook_injection_via_variavel_reatribuida_seguro.py"
+    )
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert achados == []
+
+
 def test_todos_checadores_tem_sete_funcoes():
     assert len(checadores.TODOS_CHECADORES) == 7
 

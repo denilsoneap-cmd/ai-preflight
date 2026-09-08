@@ -5,6 +5,7 @@ class ResolvedorDeImports:
     def __init__(self, tree):
         self.apelidos_modulo = {}
         self.apelidos_funcao = {}
+        self._atribuicoes = {}
         self._coletar(tree)
 
     def _coletar(self, tree):
@@ -17,6 +18,10 @@ class ResolvedorDeImports:
                 for alias in node.names:
                     nome_local = alias.asname or alias.name
                     self.apelidos_funcao[nome_local] = f"{node.module}.{alias.name}"
+            elif isinstance(node, ast.Assign):
+                for alvo in node.targets:
+                    if isinstance(alvo, ast.Name):
+                        self._atribuicoes.setdefault(alvo.id, []).append(node.value)
 
     def _nome_pontilhado(self, node):
         partes = []
@@ -39,3 +44,11 @@ class ResolvedorDeImports:
         if isinstance(node.func, ast.Attribute):
             return self._nome_pontilhado(node.func)
         return None
+
+    def resolver_valor(self, node):
+        if not isinstance(node, ast.Name):
+            return None
+        valores = self._atribuicoes.get(node.id)
+        if valores is None or len(valores) != 1:
+            return None
+        return valores[0]

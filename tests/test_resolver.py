@@ -43,3 +43,33 @@ def test_resolve_import_com_ponto_e_apelido():
     resolvedor = ResolvedorDeImports(tree)
     call_node = tree.body[1].value
     assert resolvedor.resolver_chamada(call_node) == "urllib.request.urlopen"
+
+
+def test_resolver_valor_de_atribuicao_unica():
+    tree = ast.parse("x = 'abc'\nprint(x)\n")
+    resolvedor = ResolvedorDeImports(tree)
+    name_node = tree.body[1].value.args[0]
+    valor = resolvedor.resolver_valor(name_node)
+    assert isinstance(valor, ast.Constant)
+    assert valor.value == "abc"
+
+
+def test_resolver_valor_retorna_none_quando_reatribuida():
+    tree = ast.parse("x = 'a'\nx = 'b'\nprint(x)\n")
+    resolvedor = ResolvedorDeImports(tree)
+    name_node = tree.body[2].value.args[0]
+    assert resolvedor.resolver_valor(name_node) is None
+
+
+def test_resolver_valor_retorna_none_para_nao_atribuida():
+    tree = ast.parse("print(y)\n")
+    resolvedor = ResolvedorDeImports(tree)
+    name_node = tree.body[0].value.args[0]
+    assert resolvedor.resolver_valor(name_node) is None
+
+
+def test_resolver_valor_retorna_none_para_no_nao_name():
+    tree = ast.parse("print('literal')\n")
+    resolvedor = ResolvedorDeImports(tree)
+    const_node = tree.body[0].value.args[0]
+    assert resolvedor.resolver_valor(const_node) is None
