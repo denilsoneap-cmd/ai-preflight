@@ -1,0 +1,14 @@
+[project]
+name = "ai-preflight"
+version = "0.1.0"
+description = "Analisa scripts Python gerados por IA em busca de padroes perigosos antes de voce rodar."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+
+[project.scripts]
+ai-preflight = "ai_preflight.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
