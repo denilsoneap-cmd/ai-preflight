@@ -34,3 +34,12 @@ def test_main_retorna_2_quando_arquivo_tem_erro_de_sintaxe(capsys, tmp_path):
     saida = capsys.readouterr().out
     assert codigo == 2
     assert "nao foi possivel interpretar" in saida.lower()
+
+
+def test_main_retorna_2_quando_caminho_e_diretorio(capsys, tmp_path):
+    diretorio_py = tmp_path / "pasta.py"
+    diretorio_py.mkdir()
+    codigo = main([str(diretorio_py)])
+    saida = capsys.readouterr().out
+    assert codigo == 2
+    assert "nao foi possivel ler" in saida.lower()

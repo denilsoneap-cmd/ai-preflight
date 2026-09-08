@@ -25,6 +25,9 @@ def main(argv=None):
     except SyntaxError as erro:
         print(f"Nao foi possivel interpretar o arquivo como Python valido: {erro}")
         return 2
+    except OSError as erro:
+        print(f"Nao foi possivel ler o arquivo: {erro}")
+        return 2
 
     print(formatar_relatorio(achados))
 

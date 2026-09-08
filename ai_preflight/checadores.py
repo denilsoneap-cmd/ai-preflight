@@ -47,8 +47,11 @@ def checar_pacote_instalado_silenciosamente(tree, resolver):
         if resolver.resolver_chamada(node) not in ("subprocess.run", "subprocess.call", "subprocess.Popen"):
             continue
         literais = _literais_de_string(node)
-        tem_gerenciador = any(s in ("pip", "npm") for s in literais)
-        tem_install = any(s == "install" for s in literais)
+        tokens = []
+        for s in literais:
+            tokens.extend(s.split())
+        tem_gerenciador = any(t in ("pip", "pip3", "npm") for t in tokens)
+        tem_install = "install" in tokens
         if tem_gerenciador and tem_install:
             achados.append(_achado(
                 "silent-package-install", "CRITICA", node,
@@ -68,6 +71,13 @@ def _modo_de_abertura(node):
     return None
 
 
+def _e_modo_de_escrita(modo):
+    if not modo:
+        return False
+    base = modo.lstrip("btU+")
+    return base.startswith(("w", "a", "x"))
+
+
 def _iter_e_os_walk(for_node, resolver):
     it = for_node.iter
     if isinstance(it, ast.Call):
@@ -78,9 +88,11 @@ def _iter_e_os_walk(for_node, resolver):
 def checar_reescrita_em_massa(tree, resolver):
     achados = []
     for node in ast.walk(tree):
-        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "open"):
+        if not isinstance(node, ast.Call):
             continue
-        if _modo_de_abertura(node) != "w":
+        if resolver.resolver_chamada(node) not in ("open", "io.open"):
+            continue
+        if not _e_modo_de_escrita(_modo_de_abertura(node)):
             continue
         ancestral = primeiro_ancestral(node, ast.For)
         while ancestral is not None:
@@ -125,17 +137,23 @@ def _andar_sem_descer_em_escopos_aninhados(nos):
 
 def _escopos_de_execucao(tree):
     escopos = []
-    nivel_modulo = []
-    for node in tree.body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            escopos.append(_andar_sem_descer_em_escopos_aninhados(node.body))
-        elif isinstance(node, ast.ClassDef):
-            for sub in node.body:
-                if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    escopos.append(_andar_sem_descer_em_escopos_aninhados(sub.body))
-        else:
-            nivel_modulo.append(node)
+    nivel_modulo = [
+        node for node in tree.body
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+    ]
     escopos.append(_andar_sem_descer_em_escopos_aninhados(nivel_modulo))
+
+    pendentes = [
+        node for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+    ]
+    while pendentes:
+        no = pendentes.pop()
+        escopos.append(_andar_sem_descer_em_escopos_aninhados(no.body))
+        pendentes.extend(
+            sub for sub in no.body
+            if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        )
     return escopos
 
 
@@ -207,9 +225,11 @@ def _e_caminho_git_hooks(node, resolver):
 def checar_injecao_git_hook(tree, resolver):
     achados = []
     for node in ast.walk(tree):
-        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "open"):
+        if not isinstance(node, ast.Call):
             continue
-        if _modo_de_abertura(node) != "w":
+        if resolver.resolver_chamada(node) not in ("open", "io.open"):
+            continue
+        if not _e_modo_de_escrita(_modo_de_abertura(node)):
             continue
         if not node.args:
             continue

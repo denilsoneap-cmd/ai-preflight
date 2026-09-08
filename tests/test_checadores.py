@@ -35,6 +35,13 @@ def test_checar_pacote_instalado_detecta_mesmo_com_apelido_de_import():
     assert len(achados) == 1
 
 
+def test_checar_pacote_instalado_silenciosamente_detecta_string_unica():
+    tree, resolvedor = _preparar("tests/fixtures/v2/silent_package_install_string_shell_perigoso.py")
+    achados = checadores.checar_pacote_instalado_silenciosamente(tree, resolvedor)
+    assert len(achados) == 1
+    assert achados[0]["regra_id"] == "silent-package-install"
+
+
 def test_checar_reescrita_detecta_no_arquivo_perigoso():
     tree, resolvedor = _preparar("tests/fixtures/v2/mass_file_rewrite_perigoso.py")
     achados = checadores.checar_reescrita_em_massa(tree, resolvedor)
@@ -83,6 +90,18 @@ def test_checar_execucao_remota_nao_detecta_quando_em_escopos_diferentes():
     assert achados == []
 
 
+def test_checar_execucao_remota_detecta_em_funcao_aninhada():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_code_execution_nested_function_perigoso.py")
+    achados = checadores.checar_execucao_remota(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_checar_execucao_remota_detecta_em_corpo_de_classe():
+    tree, resolvedor = _preparar("tests/fixtures/v2/remote_code_execution_class_body_perigoso.py")
+    achados = checadores.checar_execucao_remota(tree, resolvedor)
+    assert len(achados) == 1
+
+
 def test_checar_eval_exec_dinamico_detecta_no_arquivo_perigoso():
     tree, resolvedor = _preparar("tests/fixtures/v2/dynamic_eval_exec_perigoso.py")
     achados = checadores.checar_eval_exec_dinamico(tree, resolvedor)
@@ -127,6 +146,12 @@ def test_checar_injecao_git_hook_nao_detecta_arquivo_comum():
 
 def test_checar_injecao_git_hook_detecta_via_os_path_join():
     tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_os_path_join_perigoso.py")
+    achados = checadores.checar_injecao_git_hook(tree, resolvedor)
+    assert len(achados) == 1
+
+
+def test_checar_injecao_git_hook_detecta_modo_append():
+    tree, resolvedor = _preparar("tests/fixtures/v2/git_hook_injection_append_perigoso.py")
     achados = checadores.checar_injecao_git_hook(tree, resolvedor)
     assert len(achados) == 1
 
