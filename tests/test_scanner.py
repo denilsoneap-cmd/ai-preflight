@@ -57,3 +57,15 @@ def test_nao_detecta_remote_code_execution_no_arquivo_seguro():
     regra = _regra("remote-code-execution")
     achados = escanear_arquivo("tests/fixtures/remote_code_execution_seguro.py", regra)
     assert achados == []
+
+
+def test_detecta_dynamic_eval_exec_no_arquivo_perigoso():
+    regra = _regra("dynamic-eval-exec")
+    achados = escanear_arquivo("tests/fixtures/dynamic_eval_exec_perigoso.py", regra)
+    assert len(achados) == 1
+
+
+def test_nao_detecta_dynamic_eval_exec_no_arquivo_seguro():
+    regra = _regra("dynamic-eval-exec")
+    achados = escanear_arquivo("tests/fixtures/dynamic_eval_exec_seguro.py", regra)
+    assert achados == []

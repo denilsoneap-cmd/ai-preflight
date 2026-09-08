@@ -32,4 +32,11 @@ ALL_RULES = [
         "padrao_b": r"\b(exec|eval)\(",
         "mensagem": "Script baixa conteudo da internet (requests/urllib) e executa (exec/eval) no mesmo arquivo.",
     },
+    {
+        "id": "dynamic-eval-exec",
+        "tipo": RULE_LINHA,
+        "severidade": "ALTA",
+        "padrao": r"\b(eval|exec)\(\s*(?![\"'])",
+        "mensagem": "eval/exec chamado sobre uma variavel, nao um texto fixo — risco de executar codigo desconhecido.",
+    },
 ]
