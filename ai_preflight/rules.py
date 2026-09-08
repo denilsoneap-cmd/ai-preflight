@@ -47,4 +47,11 @@ ALL_RULES = [
         "padrao_b": r"shutil\.rmtree\(|os\.remove\(",
         "mensagem": "Deleta arquivos (shutil.rmtree/os.remove) dentro de um laco — risco de apagar mais do que deveria.",
     },
+    {
+        "id": "git-hook-injection",
+        "tipo": RULE_LINHA,
+        "severidade": "MEDIA",
+        "padrao": r"open\([^)]*\.git[\\/]+hooks[^)]*['\"]w['\"]",
+        "mensagem": "Escreve dentro de .git/hooks — instala automacao que roda em todo commit, sem voce perceber.",
+    },
 ]
